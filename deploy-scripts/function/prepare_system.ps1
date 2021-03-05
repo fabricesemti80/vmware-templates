@@ -2,23 +2,31 @@ function prepsystem {
     param (
         $win_target_path = 'c:\packer',
         $win_url_packer = 'https://releases.hashicorp.com/packer/1.6.6/packer_1.6.6_windows_amd64.zip',
-        $win_url_isobuilder = 'https://sourceforge.net/projects/mkisofs-md5/files/mkisofs-md5-v2.01/mkisofs-md5-2.01-Binary.zip',
+        # $win_url_isobuilder = 'https://sourceforge.net/projects/mkisofs-md5/files/latest/download', # 'https://sourceforge.net/projects/mkisofs-md5/files/mkisofs-md5-v2.01/mkisofs-md5-2.01-Binary.zip/download',
         $win_url_windowsupdates = 'https://github.com/rgl/packer-provisioner-windows-update/releases/download/v0.10.1/packer-provisioner-windows-update_0.10.1_windows_amd64.zip',
         $lnx_url_windowsupdates = 'https://github.com/rgl/packer-provisioner-windows-update/releases/download/v0.10.1/packer-provisioner-windows-update_0.10.1_linux_amd64.tar.gz',
         $lnx_url_chromedriver = 'https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip'
     )
     if ($Iswindows -eq $true) {
         try {
-            mkdir $win_target_path
+            if ((Test-Path $win_target_path) -eq $false) {
+                New-Item -ItemType Directory $win_target_path
+            }
+            else {
+                Get-ChildItem $win_target_path -Recurse | Remove-Item -Recurse -Force -Verbose
+            }
             Invoke-WebRequest -Uri $win_url_packer -OutFile $win_target_path/packer.zip
             Invoke-WebRequest -Uri $win_url_windowsupdates -OutFile $win_target_path/packerwu.zip
-            Invoke-WebRequest -Uri $win_url_isobuilder -OutFile $win_target_path/packeriso.zip
+            # Invoke-WebRequest -Uri $win_url_isobuilder -OutFile $win_target_path/packeriso.zip
             Expand-Archive $win_target_path\packer.zip $win_target_path
             Expand-Archive $win_target_path\packerwu.zip $win_target_path
-            Expand-Archive $win_target_path\packeriso.zip $win_target_path
+            # Expand-Archive $win_target_path\packeriso.zip $win_target_path
+
+            # * copy mkisofs from local source
+            Copy-Item "$PSScriptRoot\source\Binary" -Destination "$win_target_path\Binary" -verbose
         }
         catch {
-            Write-Error $error 
+            Write-Warning $_.Exception.Message
         }
     }
     if ($IsLinux -eq $true) {
