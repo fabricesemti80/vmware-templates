@@ -1,2 +1,4 @@
 **packer_cache**
 .vscode/settings.json
+builders/vsphere-iso/vsphere-iso.variables.json
+builders/vsphere-iso/vsphere-iso.variables.json
